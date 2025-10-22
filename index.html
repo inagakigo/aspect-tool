@@ -2,23 +2,23 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8" />
-<title>Aspect Tool</title>
+<title>アスペクト比ツール（四則演算対応版）</title>
 <style>
 :root { --control-h: 44px; }
 
 body{
   font-family:"Inter","Noto Sans JP",sans-serif;
-  background:#2e4f4d; /* 通常の背景 */
+  background:#2e4f4d;
   color:#fff;margin:0;
   min-height:100vh;display:grid;place-items:center;
   transition: background 0.6s ease;
 }
 .container{width:520px;display:flex;flex-direction:column;gap:28px}
 
-/* 背景の柔らかいフラッシュ */
+/* 柔らかい背景フラッシュ */
 @keyframes bgflash {
-  0%   { background-color:#3c6c69; }   /* 少し明るいシアン */
-  100% { background-color:#2e4f4d; }   /* 通常色へ自然に戻る */
+  0%   { background-color:#3c6c69; }
+  100% { background-color:#2e4f4d; }
 }
 .flash-bg { animation: bgflash 0.8s ease; }
 
@@ -49,20 +49,25 @@ body{
 .symbol{font-size:28px;margin:0 6px;color:#fff}
 .unit{font-size:18px;margin-left:4px;color:#eee}
 
-/* 🔒ロックボタン */
+/* 🔗/⛓️‍💥ボタン */
 .tool-btn{
   width:var(--control-h);height:var(--control-h);
   display:flex;justify-content:center;align-items:center;
-  border:1px solid #555;border-radius:8px;
-  background:rgba(255,255,255,.1);color:#fff;font-size:20px;
-  cursor:pointer;transition:.2s;margin-right:12px;
+  border:1px solid #777;border-radius:8px;
+  background:rgba(255,255,255,.12);color:#ddd;font-size:22px;
+  cursor:pointer;transition:all .25s;margin-right:12px;
+  text-shadow:0 1px 2px rgba(0,0,0,.4);
 }
-.tool-btn.active{background:rgba(255,255,255,.25);border-color:#fff}
+.tool-btn.active{
+  background:rgba(255,255,255,.25);
+  border-color:#fff;color:#fff;
+  box-shadow:0 0 4px rgba(255,255,255,.3);
+}
 
 /* 解像度行 */
 .row{display:flex;align-items:center;gap:8px;position:relative}
 
-/* 0→1警告アニメ */
+/* 0→1警告 */
 .flash{animation:flashline .25s ease}
 @keyframes flashline{
   0%{border-bottom-color:#ff6b6b}
@@ -84,7 +89,7 @@ body{
 
   <!-- 解像度 -->
   <div class="row">
-    <button class="tool-btn active" id="lockBtn" title="縦横を連動">🔒</button>
+    <button class="tool-btn active" id="lockBtn" title="縦横を連動">🔗</button>
     <input type="number" id="width"  class="inline-input" placeholder="横幅" value="1920">
     <span class="symbol">×</span>
     <input type="number" id="height" class="inline-input" placeholder="高さ" value="1080">
@@ -124,6 +129,14 @@ function autoResize(input){
 const resizeFns=[ratioW,ratioH,widthInput,heightInput].map(autoResize);
 function resizeAll(){resizeFns.forEach(f=>f());}
 
+/* 数式を安全に評価 */
+function evalExpression(expr){
+  try{
+    if(!/^[0-9+\-*/().\s]+$/.test(expr))return NaN;
+    return Function(`"use strict";return (${expr})`)();
+  }catch{return NaN;}
+}
+
 function coerceNonZero(input){
   if(input.value==="")return;
   const v=Number(input.value);
@@ -136,14 +149,14 @@ function coerceNonZero(input){
 function gcd(a,b){a=Math.abs(Math.round(a));b=Math.abs(Math.round(b));return b?gcd(b,a%b):(a||1);}
 function isNearCine(val){return Math.abs(val-2.35)<0.012;}
 
-/* 柔らかい背景フラッシュ */
+/* 背景フラッシュ */
 function softFlash(){
   document.body.classList.remove("flash-bg");
-  void document.body.offsetWidth; // 再トリガー
+  void document.body.offsetWidth;
   document.body.classList.add("flash-bg");
 }
 
-/* フレーム更新 */
+/* プレビュー更新 */
 function updateFrame(){
   const cW=460,cH=220;
   const r=ratio;
@@ -192,14 +205,22 @@ function onEnterConfirm(input,handler){
   input.addEventListener("keydown",e=>{
     if(e.key==="Enter"){
       e.preventDefault();
-      softFlash(); // 背景フラッシュ
-      coerceNonZero(input);
-      handler();
+      softFlash();
+
+      // 入力式を評価
+      const evaluated=evalExpression(input.value);
+      if(!isNaN(evaluated)){
+        input.value=Math.round(evaluated*1000)/1000;
+      }
+
+      // 数値が確定表示されてから再計算
+      setTimeout(()=>{
+        coerceNonZero(input);
+        handler();
+      },150); // 150msの遅延で視覚的に“確定→反映”
     }
   });
 }
-
-/* 比率側：Enterで解像度更新 */
 onEnterConfirm(ratioW,updateResolutionFromRatio);
 onEnterConfirm(ratioH,updateResolutionFromRatio);
 
@@ -216,7 +237,6 @@ onEnterConfirm(widthInput,()=>{
     updateRatioFromResolution();
   }
 });
-
 onEnterConfirm(heightInput,()=>{
   const w=parseFloat(widthInput.value),h=parseFloat(heightInput.value);
   if(!w||!h)return;
@@ -230,10 +250,10 @@ onEnterConfirm(heightInput,()=>{
   }
 });
 
-/* 🔒切替 */
+/* 🔗/⛓️‍💥切替 */
 lockBtn.addEventListener("click",()=>{
   locked=!locked;
-  lockBtn.textContent=locked?"🔒":"🔓";
+  lockBtn.textContent=locked?"🔗":"⛓️‍💥";
   lockBtn.classList.toggle("active",locked);
   if(locked){
     const w=parseFloat(widthInput.value);
