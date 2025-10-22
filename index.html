@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<title>アスペクト比ツール（暗色背景＋ロック切替）</title>
+<style>
+:root { --control-h: 44px; }
+
+body{
+  font-family:"Inter","Noto Sans JP",sans-serif;
+  background:#2e4f4d; /* 暗くくすんだシアン */
+  color:#fff;margin:0;
+  min-height:100vh;display:grid;place-items:center;
+}
+.container{width:520px;display:flex;flex-direction:column;gap:28px}
+
+/* 比率コンテナ */
+.preview{
+  width:100%;height:220px;display:flex;align-items:center;justify-content:flex-start;
+  position:relative;
+}
+.frame{
+  background:#8b7ca8;
+  color:#fff;font-weight:bold;font-size:36px;
+  display:flex;justify-content:center;align-items:center;
+  border:none;border-radius:0;transition:background 0.3s ease;
+  position:relative;padding:10px 14px;
+}
+
+/* 入力 */
+.inline-input{
+  width:auto;min-width:56px;max-width:320px;text-align:center;
+  font-size:28px;font-weight:600;color:#fff;
+  font-family:"Inter","Noto Sans JP",sans-serif;
+  background:transparent;border:none;border-bottom:2px solid rgba(255,255,255,.5);
+  outline:none;padding:2px 4px;box-sizing:content-box;-moz-appearance:textfield;
+}
+.inline-input:focus{border-bottom-color:#fff}
+.inline-input::-webkit-outer-spin-button,
+.inline-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+
+.symbol{font-size:28px;margin:0 6px;color:#fff}
+.unit{font-size:18px;margin-left:4px;color:#eee}
+
+/* 🔒ロックボタン */
+.tool-btn{
+  width:var(--control-h);height:var(--control-h);
+  display:flex;justify-content:center;align-items:center;
+  border:1px solid #555;border-radius:8px;
+  background:rgba(255,255,255,.1);color:#fff;font-size:20px;
+  cursor:pointer;transition:.2s;margin-right:12px;
+}
+.tool-btn.active{background:rgba(255,255,255,.25);border-color:#fff}
+
+/* 解像度行 */
+.row{display:flex;align-items:center;gap:8px;position:relative}
+
+/* 0→1フィードバック */
+.flash{animation:flashline .25s ease}
+@keyframes flashline{
+  0%{border-bottom-color:#ff6b6b}
+  100%{border-bottom-color:rgba(255,255,255,.5)}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- 比率 -->
+  <div class="preview">
+    <div class="frame" id="frame">
+      <input type="number" id="ratioW" class="inline-input" value="16" step="any">
+      <span class="symbol">：</span>
+      <input type="number" id="ratioH" class="inline-input" value="9" step="any">
+    </div>
+  </div>
+
+  <!-- 解像度 -->
+  <div class="row">
+    <button class="tool-btn active" id="lockBtn" title="縦横を連動">🔒</button>
+    <input type="number" id="width"  class="inline-input" placeholder="横幅" value="1920">
+    <span class="symbol">×</span>
+    <input type="number" id="height" class="inline-input" placeholder="高さ" value="1080">
+    <span class="unit">px</span>
+  </div>
+
+</div>
+
+<script>
+const ratioW=document.getElementById("ratioW");
+const ratioH=document.getElementById("ratioH");
+const widthInput=document.getElementById("width");
+const heightInput=document.getElementById("height");
+const frame=document.getElementById("frame");
+const lockBtn=document.getElementById("lockBtn");
+
+let ratio=16/9;
+let locked=true;
+
+/* オートリサイズ */
+function autoResize(input){
+  const span=document.createElement("span");
+  const cs=getComputedStyle(input);
+  span.style.position="fixed";
+  span.style.visibility="hidden";
+  span.style.whiteSpace="pre";
+  span.style.font=`${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+  document.body.appendChild(span);
+  const update=()=>{
+    span.textContent=input.value||input.placeholder||"";
+    const w=Math.min(Math.max(56,span.offsetWidth+16),320);
+    input.style.width=w+"px";
+  };
+  input.addEventListener("input",update);
+  return update;
+}
+const resizeFns=[ratioW,ratioH,widthInput,heightInput].map(autoResize);
+function resizeAll(){resizeFns.forEach(f=>f());}
+
+function coerceNonZero(input){
+  if(input.value==="")return;
+  const v=Number(input.value);
+  if(v===0){
+    input.value="1";
+    input.classList.add("flash");
+    setTimeout(()=>input.classList.remove("flash"),260);
+  }
+}
+function gcd(a,b){a=Math.abs(Math.round(a));b=Math.abs(Math.round(b));return b?gcd(b,a%b):(a||1);}
+function isNearCine(val){return Math.abs(val-2.35)<0.012;}
+
+/* フレーム更新 */
+function updateFrame(){
+  const cW=460,cH=220;
+  const r=ratio;
+  let dw,dh;
+  if(r>cW/cH){dw=cW;dh=cW/r;}else{dh=cH;dw=cH*r;}
+  frame.style.width=`${dw}px`;
+  frame.style.height=`${dh}px`;
+
+  const rw=parseFloat(ratioW.value);
+  const rh=parseFloat(ratioH.value);
+  if(!isNearCine(r)&&(String(rw).length>3||String(rh).length>3||rw>99||rh>99)){
+    frame.style.background="#aa5555";
+  }else{
+    frame.style.background="#8b7ca8";
+  }
+}
+
+/* 比率→解像度 */
+function updateResolutionFromRatio(){
+  const rw=parseFloat(ratioW.value);
+  const rh=parseFloat(ratioH.value);
+  if(!rw||!rh)return;
+  ratio=rw/rh;
+  if(ratio<1){heightInput.value=1920;widthInput.value=Math.round(1920*ratio);}
+  else{widthInput.value=1920;heightInput.value=Math.round(1920/ratio);}
+  resizeAll();updateFrame();
+}
+
+/* 解像度→比率 */
+function updateRatioFromResolution(){
+  const w=parseFloat(widthInput.value);
+  const h=parseFloat(heightInput.value);
+  if(!w||!h)return;
+  ratio=w/h;
+  if(isNearCine(ratio)){ratioW.value=2.35;ratioH.value=1;}
+  else{
+    const g=gcd(w,h);
+    ratioW.value=Math.round(w/g);
+    ratioH.value=Math.round(h/g);
+  }
+  resizeAll();updateFrame();
+}
+
+/* Enter確定 */
+function onEnterConfirm(input,handler){
+  input.addEventListener("keydown",e=>{
+    if(e.key==="Enter"){e.preventDefault();coerceNonZero(input);handler();}
+  });
+}
+onEnterConfirm(ratioW,updateResolutionFromRatio);
+onEnterConfirm(ratioH,updateResolutionFromRatio);
+onEnterConfirm(widthInput,()=>{
+  const w=parseFloat(widthInput.value),h=parseFloat(heightInput.value);
+  if(!w||!h)return;
+  if(locked)heightInput.value=Math.round(w/ratio);
+  resizeAll();updateRatioFromResolution();
+});
+onEnterConfirm(heightInput,()=>{
+  const w=parseFloat(widthInput.value),h=parseFloat(heightInput.value);
+  if(!w||!h)return;
+  if(locked)widthInput.value=Math.round(h*ratio);
+  resizeAll();updateRatioFromResolution();
+});
+
+/* 🔒切替 */
+lockBtn.addEventListener("click",()=>{
+  locked=!locked;
+  lockBtn.textContent=locked?"🔒":"🔓";
+  lockBtn.classList.toggle("active",locked);
+  if(locked){
+    const w=parseFloat(widthInput.value);
+    const h=parseFloat(heightInput.value);
+    if(w&&h)ratio=w/h;
+  }
+});
+
+/* 初期化 */
+updateResolutionFromRatio();
+resizeAll();
+updateFrame();
+</script>
+</body>
+</html>
