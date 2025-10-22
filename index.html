@@ -2,20 +2,21 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8" />
-<title>Aspect Tool</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ASPECT PROTOCOL</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@500;600&display=swap" rel="stylesheet">
 <style>
-  /* === 追加：画面外枠（疑似ウィンドウ枠） === */
   .page-frame {
-    position: fixed;
-    inset: 0;
+    position: fixed; inset: 0;
     border: 3px solid #FFFFFF;
     box-sizing: border-box;
-    pointer-events: none;   /* クリック操作を邪魔しない */
-    z-index: 9999;          /* いちばん上に表示 */
+    pointer-events: none;
+    z-index: 9999;
   }
 
   body {
-    font-family: "Inter", "Noto Sans JP", sans-serif;
+    font-family: "IBM Plex Sans", "Noto Sans JP", sans-serif;
     background: #000080;
     color: #FFFFFF;
     margin: 0;
@@ -25,10 +26,7 @@
     transition: filter 0.6s ease;
   }
 
-  /* 背景がふんわり光る */
-  body.flash {
-    animation: fireflyGlow 2.2s ease-in-out;
-  }
+  body.flash { animation: fireflyGlow 2.2s ease-in-out; }
   @keyframes fireflyGlow {
     0% { filter: brightness(1); }
     40% { filter: brightness(1.15) blur(0.3px); }
@@ -37,63 +35,55 @@
   }
 
   .container {
-    width: 520px;
+    width: min(92vw, 560px);
     display: flex;
     flex-direction: column;
-    gap: 60px;
+    gap: clamp(24px, 6vw, 60px);
   }
 
   .preview {
     width: 100%;
-    height: 280px;
+    height: clamp(180px, 42vw, 300px);
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
   }
 
-  /* コンテナ */
   .frame {
     background: #004687;
     color: #FFFFFF;
     font-weight: 700;
-    font-size: 36px;
+    font-size: clamp(20px, 5vw, 36px);
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 12px 14px;
-    transform: scale(1.25);
+    padding: clamp(6px, 2vw, 12px) clamp(8px, 3vw, 14px);
     transform-origin: center;
-    position: relative;
     border: none;
     border-radius: 0;
     transition: width 0.3s ease, height 0.3s ease;
-    overflow: visible;
-
-    /* 常時うっすら呼吸するグロー */
+    overflow: hidden;
     box-shadow: 0 0 6px rgba(255,255,255,0.12);
     animation: subtlePulse 8s ease-in-out infinite;
+    position: relative;
   }
 
   @keyframes subtlePulse {
-    0%, 100% { box-shadow: 0 0 6px rgba(255,255,255,0.1); }
+    0%, 100% { box-shadow: 0 0 6px rgba(255,255,255,0.10); }
     50% { box-shadow: 0 0 14px rgba(255,255,255,0.25); }
   }
 
-  /* 約分可能時の左側シアン光 */
   .frame.glow::before {
     content: "";
     position: absolute;
-    left: 0;
-    top: 0;
-    width: 8px;
-    height: 100%;
+    left: 0; top: 0;
+    width: 8px; height: 100%;
     background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(0,255,255,0.6));
     box-shadow: 0 0 18px rgba(0,255,255,0.7);
-    border-radius: 0 4px 4px 0;
-    transition: opacity 0.3s ease, box-shadow 0.3s ease;
-    opacity: 0.6;
+    opacity: .7;
+    transition: opacity .3s, box-shadow .3s;
   }
   .frame.glow:hover::before {
     opacity: 1;
@@ -102,33 +92,33 @@
 
   .alias-label {
     position: absolute;
-    top: 6px;
-    left: 10px;
-    font-size: 15px;
-    color: #FFFFFF;
+    top: 6px; left: 10px;
+    font-size: clamp(12px, 3vw, 15px);
+    color: #fff;
     opacity: 0;
-    transition: opacity 0.6s ease;
+    transition: opacity .6s;
     pointer-events: none;
   }
   .alias-label.show { opacity: 1; }
 
   .mode-label {
     position: absolute;
-    right: 12px;
-    bottom: 8px;
-    font-size: 10px;
+    right: 8px;
+    bottom: 6px;
+    font-size: clamp(9px, 2vw, 10px);
     border: 1px solid rgba(255,255,255,0.4);
-    border-radius: 6px;
-    padding: 2px 6px;
-    color: #FFFFFF;
+    border-radius: 4px;
+    padding: 2px 5px;
+    color: #fff;
+    background: rgba(0,0,0,0.2);
     cursor: pointer;
     user-select: none;
   }
 
   .inline-input {
-    width: 110px;
+    width: clamp(62px, 18vw, 110px);
     text-align: center;
-    font-size: 26px;
+    font-size: clamp(18px, 4.2vw, 26px);
     font-weight: 600;
     background: transparent;
     border: none;
@@ -141,18 +131,15 @@
   }
 
   input[type=number]::-webkit-inner-spin-button,
-  input[type=number]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
+  input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
   input[type=number] { -moz-appearance: textfield; }
 
-  .symbol { font-size: 28px; margin: 0 8px; color: #FFFFFF; }
-  .unit { font-size: 18px; margin-left: 4px; color: #FFFFFF; }
+  .symbol { font-size: clamp(18px, 4.4vw, 28px); margin: 0 8px; color:#fff; }
+  .unit { font-size: clamp(13px, 3.2vw, 18px); margin-left: 4px; color:#fff; }
 
   .tool-btn {
-    width: 44px;
-    height: 44px;
+    width: clamp(34px, 10vw, 44px);
+    height: clamp(34px, 10vw, 44px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -160,25 +147,44 @@
     border: 1px solid rgba(255,255,255,0.5);
     border-radius: 8px;
     background: rgba(255,255,255,0.12);
-    color: #FFFFFF;
-    font-size: 22px;
-    margin-right: 12px;
+    color: #fff;
+    font-size: clamp(16px, 5vw, 22px);
+    margin-right: 10px;
   }
 
   .row {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-wrap: wrap;
     gap: 8px;
+  }
+
+  .corner-title {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 4px 10px 3px 10px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: clamp(9px, 1.5vw, 11px);
+    font-weight: 600;
+    color: #000060;
+    background: #FFD700;
+    border-radius: 4px 0 0 0;
+    box-shadow: 0 0 8px rgba(255,215,0,0.4);
+    letter-spacing: 1.2px;
+    text-align: right;
+    user-select: none;
+    pointer-events: none;
   }
 </style>
 </head>
 <body>
-  <!-- 追加：画面外枠 -->
   <div class="page-frame" aria-hidden="true"></div>
 
   <div class="container">
-    <div class="preview">
+    <div class="preview" id="preview">
       <div class="frame" id="frame">
         <input type="number" id="ratioW" class="inline-input" value="16" step="any">
         <span class="symbol">：</span>
@@ -189,7 +195,7 @@
     </div>
 
     <div class="row">
-      <button class="tool-btn active" id="lockBtn">🔗</button>
+      <button class="tool-btn" id="lockBtn">🔗</button>
       <input type="number" id="width" class="inline-input" value="1920">
       <span class="symbol">×</span>
       <input type="number" id="height" class="inline-input" value="1080">
@@ -197,20 +203,23 @@
     </div>
   </div>
 
+  <div class="corner-title">ASPECT PROTOCOL</div>
+
 <script>
-const state={ratio:16/9,decimalMode:false,locked:true};
+const state={ratio:16/9, decimalMode:false, locked:true};
+const preview=document.getElementById("preview");
+const frame=document.getElementById("frame");
 const ratioW=document.getElementById("ratioW");
 const ratioH=document.getElementById("ratioH");
 const widthInput=document.getElementById("width");
 const heightInput=document.getElementById("height");
-const frame=document.getElementById("frame");
 const modeLabel=document.getElementById("modeLabel");
 const lockBtn=document.getElementById("lockBtn");
 const aliasLabel=document.getElementById("aliasLabel");
 
 function flashBG(){
   document.body.classList.remove("flash");
-  void document.body.offsetHeight; // 再描画強制で背景アニメ再実行
+  void document.body.offsetHeight;
   document.body.classList.add("flash");
 }
 
@@ -218,11 +227,22 @@ function gcd(a,b){a=Math.abs(Math.round(a));b=Math.abs(Math.round(b));return b?g
 function safeEval(v){try{const val=Function('"use strict";return('+v+')')();return isFinite(val)?Number(val):0;}catch{return 0;}}
 function formatDecimalSmart(r){return(Math.abs(r-Math.round(r))<1e-3)?String(Math.round(r)):r.toFixed(2);}
 
+// 🧩 0入力ガード
+function zeroGuardImmediate(e){
+  if(!state.decimalMode){
+    const v=String(e.target.value).trim();
+    if(v==="0") e.target.value="1";
+  }
+}
+ratioW.addEventListener("input", zeroGuardImmediate);
+ratioH.addEventListener("input", zeroGuardImmediate);
+widthInput.addEventListener("input", zeroGuardImmediate);
+heightInput.addEventListener("input", zeroGuardImmediate);
+
 const aliasMap={
-"1024x768":"XGA","1280x800":"WXGA","1600x900":"HD+","1920x1080":"FHD","1920x1200":"WUXGA",
-"2560x1440":"WQHD","2560x1600":"WQXGA","3440x1440":"UWQHD","3840x2160":"UHD 4K","4096x2160":"DCI 4K",
-"5120x2160":"DQHD","5120x2880":"5K","6016x3384":"6K","7680x4320":"UHD 8K","8192x4320":"DCI 8K",
-"1280x720":"HD 720","1366x768":"WXGA"
+  "1024x768":"XGA","1280x800":"WXGA","1600x900":"HD+","1920x1080":"FHD","1920x1200":"WUXGA",
+  "2560x1440":"WQHD","2560x1600":"WQXGA","3440x1440":"UWQHD","3840x2160":"UHD 4K","4096x2160":"DCI 4K",
+  "5120x2880":"5K","6016x3384":"6K","7680x4320":"UHD 8K","8192x4320":"DCI 8K","1280x720":"HD 720","1366x768":"WXGA"
 };
 let aliasTimer=null;
 function showAlias(){
@@ -235,106 +255,86 @@ function showAlias(){
   aliasTimer=setTimeout(()=>aliasLabel.classList.remove("show"),5000);
 }
 
-function updateRatioInputsFromState(){
-  const r=state.ratio;
-  if(state.decimalMode){ratioW.value=formatDecimalSmart(r);ratioH.value=1;}
-  else{
-    let bestW=Math.round(r*9),bestH=9,minErr=Math.abs(bestW/bestH-r);
-    for(let h=2;h<=100;h++){const w=Math.round(r*h),err=Math.abs(w/h-r);
-      if(err<minErr){minErr=err;bestW=w;bestH=h;}}
-    const g=gcd(bestW,bestH);
-    ratioW.value=Math.round(bestW/g);ratioH.value=Math.round(bestH/g);
-  }
-  checkGlow();
-}
-
-function materializeResolution(){widthInput.value=1920;heightInput.value=Math.round(1920/state.ratio);}
 function renderFrame(){
-  const cW=500,cH=280,r=state.ratio;
-  let dw,dh;if(r>cW/cH){dw=cW;dh=cW/r;}else{dh=cH;dw=cH*r;}
-  frame.style.width=`${dw}px`;frame.style.height=`${dh}px`;
+  const box=preview.getBoundingClientRect();
+  const cW=Math.max(60,box.width-40);
+  const cH=Math.max(60,box.height-20);
+  const r=Math.max(0.0001,state.ratio);
+  let dw,dh;
+  if(r>cW/cH){dw=cW;dh=cW/r;}else{dh=cH;dw=cH*r;}
+  frame.style.width=`${dw}px`;
+  frame.style.height=`${dh}px`;
 }
-function renderAll(){updateRatioInputsFromState();materializeResolution();renderFrame();}
 
-/* 約分可能状態の検出 */
 function checkGlow(){
-  const rw=safeEval(ratioW.value);
-  const rh=safeEval(ratioH.value);
-  const g=gcd(rw,rh);
-  if(!state.decimalMode && g>1){frame.classList.add("glow");}
+  const rw=safeEval(ratioW.value),rh=safeEval(ratioH.value),g=gcd(rw,rh);
+  if(!state.decimalMode&&g>1){frame.classList.add("glow");}
   else{frame.classList.remove("glow");}
 }
 
-modeLabel.addEventListener("click",()=>{
-  state.decimalMode=!state.decimalMode;
-  modeLabel.textContent=state.decimalMode?"小数点モード":"整数モード";
-  modeLabel.classList.toggle("active",state.decimalMode);
-  updateRatioInputsFromState();renderFrame();
-});
-
-lockBtn.addEventListener("click",()=>{
-  state.locked=!state.locked;
-  lockBtn.textContent=state.locked?"🔗":"⛓️‍💥";
-  lockBtn.classList.toggle("active",state.locked);
-});
-
-function zeroGuardImmediate(e){
-  if(!state.decimalMode){
-    const v=String(e.target.value).trim();
-    if(v==="0")e.target.value="1";
+function updateRatioInputs(){
+  if(state.decimalMode){
+    const val=formatDecimalSmart(state.ratio);
+    ratioW.value=val; ratioH.value=1;
+  }else{
+    const w=Math.round(state.ratio*100),h=100;
+    const g=gcd(w,h);
+    ratioW.value=w/g; ratioH.value=h/g;
   }
+  checkGlow(); renderFrame();
 }
-ratioW.addEventListener("input",zeroGuardImmediate);
-ratioH.addEventListener("input",zeroGuardImmediate);
 
 function commitRatioFromInputs(){
   let rw=safeEval(ratioW.value),rh=safeEval(ratioH.value);
   if(rw<=0)rw=1;if(rh<=0)rh=1;
-  state.ratio=rw/rh;materializeResolution();renderFrame();flashBG();checkGlow();
+  state.ratio=rw/rh;
+  widthInput.value=1920;
+  heightInput.value=Math.round(1920/state.ratio);
+  renderFrame();flashBG();checkGlow();
 }
-
 ratioW.addEventListener("keydown",e=>{if(e.key==="Enter")commitRatioFromInputs();});
 ratioH.addEventListener("keydown",e=>{if(e.key==="Enter")commitRatioFromInputs();});
-ratioW.addEventListener("change",commitRatioFromInputs);
-ratioH.addEventListener("change",commitRatioFromInputs);
 
 function commitResolutionFromInputs(activeEl){
   let w=safeEval(widthInput.value),h=safeEval(heightInput.value);
   if(w<=0)w=1;if(h<=0)h=1;
   if(state.locked){
-    if(activeEl===widthInput){widthInput.value=w;heightInput.value=Math.round(w/state.ratio);}
-    else{heightInput.value=h;widthInput.value=Math.round(h*state.ratio);}
+    if(activeEl===widthInput){heightInput.value=Math.round(w/state.ratio);}
+    else{widthInput.value=Math.round(h*state.ratio);}
   }else{
-    widthInput.value=w;heightInput.value=h;
-    state.ratio=w/h;updateRatioInputsFromState();
+    state.ratio=w/h; updateRatioInputs();
   }
   renderFrame();flashBG();showAlias();checkGlow();
 }
+
+// 🔹 左右どちらの入力もEnterで確定可能に
+widthInput.addEventListener("keydown",e=>{if(e.key==="Enter")commitResolutionFromInputs(widthInput);});
+heightInput.addEventListener("keydown",e=>{if(e.key==="Enter")commitResolutionFromInputs(heightInput);});
 widthInput.addEventListener("change",()=>commitResolutionFromInputs(widthInput));
 heightInput.addEventListener("change",()=>commitResolutionFromInputs(heightInput));
 
-document.addEventListener("keydown",e=>{
-  if(e.key!=="Enter")return;
-  if(document.activeElement===widthInput)commitResolutionFromInputs(widthInput);
-  else if(document.activeElement===heightInput)commitResolutionFromInputs(heightInput);
-});
-
-/* 約分クリック */
-frame.addEventListener("click",()=>{
+frame.addEventListener("click",(e)=>{
+  if(e.target.closest(".inline-input")||e.target.closest(".mode-label")) return;
   if(state.decimalMode)return;
   let rw=safeEval(ratioW.value),rh=safeEval(ratioH.value);
-  if(rw<=0)rw=1;if(rh<=0)rh=1;
   const g=gcd(rw,rh);
-  if(g>1){
-    ratioW.value=Math.round(rw/g);
-    ratioH.value=Math.round(rh/g);
-    renderFrame();
-    flashBG();
-    checkGlow();
-  }
+  if(g>1){ratioW.value=rw/g;ratioH.value=rh/g;flashBG();checkGlow();}
 });
 
-renderAll();
+modeLabel.addEventListener("click",()=>{
+  state.decimalMode=!state.decimalMode;
+  modeLabel.textContent=state.decimalMode?"小数点モード":"整数モード";
+  updateRatioInputs();
+});
+
+lockBtn.addEventListener("click",()=>{
+  state.locked=!state.locked;
+  lockBtn.textContent=state.locked?"🔗":"⛓️‍💥";
+});
+
+const ro=new ResizeObserver(()=>renderFrame());
+ro.observe(preview);
+renderFrame();
 </script>
 </body>
 </html>
