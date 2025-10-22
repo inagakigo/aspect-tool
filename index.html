@@ -4,269 +4,337 @@
 <meta charset="UTF-8" />
 <title>Aspect Tool</title>
 <style>
-:root { --control-h: 44px; }
+  /* === 追加：画面外枠（疑似ウィンドウ枠） === */
+  .page-frame {
+    position: fixed;
+    inset: 0;
+    border: 3px solid #FFFFFF;
+    box-sizing: border-box;
+    pointer-events: none;   /* クリック操作を邪魔しない */
+    z-index: 9999;          /* いちばん上に表示 */
+  }
 
-body{
-  font-family:"Inter","Noto Sans JP",sans-serif;
-  background:#2e4f4d;
-  color:#fff;margin:0;
-  min-height:100vh;display:grid;place-items:center;
-  transition: background 0.6s ease;
-}
-.container{width:520px;display:flex;flex-direction:column;gap:28px}
+  body {
+    font-family: "Inter", "Noto Sans JP", sans-serif;
+    background: #000080;
+    color: #FFFFFF;
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    transition: filter 0.6s ease;
+  }
 
-/* 柔らかい背景フラッシュ */
-@keyframes bgflash {
-  0%   { background-color:#3c6c69; }
-  100% { background-color:#2e4f4d; }
-}
-.flash-bg { animation: bgflash 0.8s ease; }
+  /* 背景がふんわり光る */
+  body.flash {
+    animation: fireflyGlow 2.2s ease-in-out;
+  }
+  @keyframes fireflyGlow {
+    0% { filter: brightness(1); }
+    40% { filter: brightness(1.15) blur(0.3px); }
+    60% { filter: brightness(1.18) blur(0.6px); }
+    100% { filter: brightness(1); }
+  }
 
-/* 比率コンテナ */
-.preview{
-  width:100%;height:220px;display:flex;align-items:center;justify-content:flex-start;
-  position:relative;
-}
-.frame{
-  background:#8b7ca8;color:#fff;font-weight:bold;font-size:36px;
-  display:flex;justify-content:center;align-items:center;
-  border:none;border-radius:0;transition:background 0.3s ease;
-  position:relative;padding:10px 14px;
-}
+  .container {
+    width: 520px;
+    display: flex;
+    flex-direction: column;
+    gap: 60px;
+  }
 
-/* 入力欄 */
-.inline-input{
-  width:auto;min-width:56px;max-width:320px;text-align:center;
-  font-size:28px;font-weight:600;color:#fff;
-  font-family:"Inter","Noto Sans JP",sans-serif;
-  background:transparent;border:none;border-bottom:2px solid rgba(255,255,255,.5);
-  outline:none;padding:2px 4px;box-sizing:content-box;-moz-appearance:textfield;
-}
-.inline-input:focus{border-bottom-color:#fff}
-.inline-input::-webkit-outer-spin-button,
-.inline-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .preview {
+    width: 100%;
+    height: 280px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
 
-.symbol{font-size:28px;margin:0 6px;color:#fff}
-.unit{font-size:18px;margin-left:4px;color:#eee}
+  /* コンテナ */
+  .frame {
+    background: #004687;
+    color: #FFFFFF;
+    font-weight: 700;
+    font-size: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 14px;
+    transform: scale(1.25);
+    transform-origin: center;
+    position: relative;
+    border: none;
+    border-radius: 0;
+    transition: width 0.3s ease, height 0.3s ease;
+    overflow: visible;
 
-/* 🔗/⛓️‍💥ボタン */
-.tool-btn{
-  width:var(--control-h);height:var(--control-h);
-  display:flex;justify-content:center;align-items:center;
-  border:1px solid #777;border-radius:8px;
-  background:rgba(255,255,255,.12);color:#ddd;font-size:22px;
-  cursor:pointer;transition:all .25s;margin-right:12px;
-  text-shadow:0 1px 2px rgba(0,0,0,.4);
-}
-.tool-btn.active{
-  background:rgba(255,255,255,.25);
-  border-color:#fff;color:#fff;
-  box-shadow:0 0 4px rgba(255,255,255,.3);
-}
+    /* 常時うっすら呼吸するグロー */
+    box-shadow: 0 0 6px rgba(255,255,255,0.12);
+    animation: subtlePulse 8s ease-in-out infinite;
+  }
 
-/* 解像度行 */
-.row{display:flex;align-items:center;gap:8px;position:relative}
+  @keyframes subtlePulse {
+    0%, 100% { box-shadow: 0 0 6px rgba(255,255,255,0.1); }
+    50% { box-shadow: 0 0 14px rgba(255,255,255,0.25); }
+  }
 
-/* 0→1警告 */
-.flash{animation:flashline .25s ease}
-@keyframes flashline{
-  0%{border-bottom-color:#ff6b6b}
-  100%{border-bottom-color:rgba(255,255,255,.5)}
-}
+  /* 約分可能時の左側シアン光 */
+  .frame.glow::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 8px;
+    height: 100%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(0,255,255,0.6));
+    box-shadow: 0 0 18px rgba(0,255,255,0.7);
+    border-radius: 0 4px 4px 0;
+    transition: opacity 0.3s ease, box-shadow 0.3s ease;
+    opacity: 0.6;
+  }
+  .frame.glow:hover::before {
+    opacity: 1;
+    box-shadow: 0 0 28px rgba(0,255,255,1);
+  }
+
+  .alias-label {
+    position: absolute;
+    top: 6px;
+    left: 10px;
+    font-size: 15px;
+    color: #FFFFFF;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    pointer-events: none;
+  }
+  .alias-label.show { opacity: 1; }
+
+  .mode-label {
+    position: absolute;
+    right: 12px;
+    bottom: 8px;
+    font-size: 10px;
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 6px;
+    padding: 2px 6px;
+    color: #FFFFFF;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .inline-input {
+    width: 110px;
+    text-align: center;
+    font-size: 26px;
+    font-weight: 600;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid rgba(255,255,255,0.8);
+    outline: none;
+    padding-bottom: 3px;
+    line-height: 1;
+    appearance: textfield;
+    color: #FFFFFF;
+  }
+
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type=number] { -moz-appearance: textfield; }
+
+  .symbol { font-size: 28px; margin: 0 8px; color: #FFFFFF; }
+  .unit { font-size: 18px; margin-left: 4px; color: #FFFFFF; }
+
+  .tool-btn {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.5);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.12);
+    color: #FFFFFF;
+    font-size: 22px;
+    margin-right: 12px;
+  }
+
+  .row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
 </style>
 </head>
 <body>
-<div class="container">
+  <!-- 追加：画面外枠 -->
+  <div class="page-frame" aria-hidden="true"></div>
 
-  <!-- 比率 -->
-  <div class="preview">
-    <div class="frame" id="frame">
-      <input type="number" id="ratioW" class="inline-input" value="16" step="any">
-      <span class="symbol">：</span>
-      <input type="number" id="ratioH" class="inline-input" value="9" step="any">
+  <div class="container">
+    <div class="preview">
+      <div class="frame" id="frame">
+        <input type="number" id="ratioW" class="inline-input" value="16" step="any">
+        <span class="symbol">：</span>
+        <input type="number" id="ratioH" class="inline-input" value="9" step="any">
+        <div class="alias-label" id="aliasLabel"></div>
+        <div class="mode-label" id="modeLabel">整数モード</div>
+      </div>
+    </div>
+
+    <div class="row">
+      <button class="tool-btn active" id="lockBtn">🔗</button>
+      <input type="number" id="width" class="inline-input" value="1920">
+      <span class="symbol">×</span>
+      <input type="number" id="height" class="inline-input" value="1080">
+      <span class="unit">px</span>
     </div>
   </div>
 
-  <!-- 解像度 -->
-  <div class="row">
-    <button class="tool-btn active" id="lockBtn" title="縦横を連動">🔗</button>
-    <input type="number" id="width"  class="inline-input" placeholder="横幅" value="1920">
-    <span class="symbol">×</span>
-    <input type="number" id="height" class="inline-input" placeholder="高さ" value="1080">
-    <span class="unit">px</span>
-  </div>
-
-</div>
-
 <script>
+const state={ratio:16/9,decimalMode:false,locked:true};
 const ratioW=document.getElementById("ratioW");
 const ratioH=document.getElementById("ratioH");
 const widthInput=document.getElementById("width");
 const heightInput=document.getElementById("height");
 const frame=document.getElementById("frame");
+const modeLabel=document.getElementById("modeLabel");
 const lockBtn=document.getElementById("lockBtn");
+const aliasLabel=document.getElementById("aliasLabel");
 
-let ratio=16/9;
-let locked=true;
-
-/* オートリサイズ */
-function autoResize(input){
-  const span=document.createElement("span");
-  const cs=getComputedStyle(input);
-  span.style.position="fixed";
-  span.style.visibility="hidden";
-  span.style.whiteSpace="pre";
-  span.style.font=`${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
-  document.body.appendChild(span);
-  const update=()=>{
-    span.textContent=input.value||input.placeholder||"";
-    const w=Math.min(Math.max(56,span.offsetWidth+16),320);
-    input.style.width=w+"px";
-  };
-  input.addEventListener("input",update);
-  return update;
-}
-const resizeFns=[ratioW,ratioH,widthInput,heightInput].map(autoResize);
-function resizeAll(){resizeFns.forEach(f=>f());}
-
-/* 数式を安全に評価 */
-function evalExpression(expr){
-  try{
-    if(!/^[0-9+\-*/().\s]+$/.test(expr))return NaN;
-    return Function(`"use strict";return (${expr})`)();
-  }catch{return NaN;}
+function flashBG(){
+  document.body.classList.remove("flash");
+  void document.body.offsetHeight; // 再描画強制で背景アニメ再実行
+  document.body.classList.add("flash");
 }
 
-function coerceNonZero(input){
-  if(input.value==="")return;
-  const v=Number(input.value);
-  if(v===0){
-    input.value="1";
-    input.classList.add("flash");
-    setTimeout(()=>input.classList.remove("flash"),260);
-  }
-}
 function gcd(a,b){a=Math.abs(Math.round(a));b=Math.abs(Math.round(b));return b?gcd(b,a%b):(a||1);}
-function isNearCine(val){return Math.abs(val-2.35)<0.012;}
+function safeEval(v){try{const val=Function('"use strict";return('+v+')')();return isFinite(val)?Number(val):0;}catch{return 0;}}
+function formatDecimalSmart(r){return(Math.abs(r-Math.round(r))<1e-3)?String(Math.round(r)):r.toFixed(2);}
 
-/* 背景フラッシュ */
-function softFlash(){
-  document.body.classList.remove("flash-bg");
-  void document.body.offsetWidth;
-  document.body.classList.add("flash-bg");
+const aliasMap={
+"1024x768":"XGA","1280x800":"WXGA","1600x900":"HD+","1920x1080":"FHD","1920x1200":"WUXGA",
+"2560x1440":"WQHD","2560x1600":"WQXGA","3440x1440":"UWQHD","3840x2160":"UHD 4K","4096x2160":"DCI 4K",
+"5120x2160":"DQHD","5120x2880":"5K","6016x3384":"6K","7680x4320":"UHD 8K","8192x4320":"DCI 8K",
+"1280x720":"HD 720","1366x768":"WXGA"
+};
+let aliasTimer=null;
+function showAlias(){
+  const key=`${widthInput.value}x${heightInput.value}`;
+  const alias=aliasMap[key];
+  if(!alias)return;
+  aliasLabel.textContent=alias;
+  aliasLabel.classList.add("show");
+  clearTimeout(aliasTimer);
+  aliasTimer=setTimeout(()=>aliasLabel.classList.remove("show"),5000);
 }
 
-/* プレビュー更新 */
-function updateFrame(){
-  const cW=460,cH=220;
-  const r=ratio;
-  let dw,dh;
-  if(r>cW/cH){dw=cW;dh=cW/r;}else{dh=cH;dw=cH*r;}
-  frame.style.width=`${dw}px`;
-  frame.style.height=`${dh}px`;
-
-  const rw=parseFloat(ratioW.value);
-  const rh=parseFloat(ratioH.value);
-  if(!isNearCine(r)&&(String(rw).length>3||String(rh).length>3||rw>99||rh>99)){
-    frame.style.background="#aa5555";
-  }else{
-    frame.style.background="#8b7ca8";
-  }
-}
-
-/* 比率→解像度 */
-function updateResolutionFromRatio(){
-  const rw=parseFloat(ratioW.value);
-  const rh=parseFloat(ratioH.value);
-  if(!rw||!rh)return;
-  ratio=rw/rh;
-  if(ratio<1){heightInput.value=1920;widthInput.value=Math.round(1920*ratio);}
-  else{widthInput.value=1920;heightInput.value=Math.round(1920/ratio);}
-  resizeAll();updateFrame();
-}
-
-/* 解像度→比率 */
-function updateRatioFromResolution(){
-  const w=parseFloat(widthInput.value);
-  const h=parseFloat(heightInput.value);
-  if(!w||!h)return;
-  ratio=w/h;
-  if(isNearCine(ratio)){ratioW.value=2.35;ratioH.value=1;}
+function updateRatioInputsFromState(){
+  const r=state.ratio;
+  if(state.decimalMode){ratioW.value=formatDecimalSmart(r);ratioH.value=1;}
   else{
-    const g=gcd(w,h);
-    ratioW.value=Math.round(w/g);
-    ratioH.value=Math.round(h/g);
+    let bestW=Math.round(r*9),bestH=9,minErr=Math.abs(bestW/bestH-r);
+    for(let h=2;h<=100;h++){const w=Math.round(r*h),err=Math.abs(w/h-r);
+      if(err<minErr){minErr=err;bestW=w;bestH=h;}}
+    const g=gcd(bestW,bestH);
+    ratioW.value=Math.round(bestW/g);ratioH.value=Math.round(bestH/g);
   }
-  resizeAll();updateFrame();
+  checkGlow();
 }
 
-/* Enter確定 */
-function onEnterConfirm(input,handler){
-  input.addEventListener("keydown",e=>{
-    if(e.key==="Enter"){
-      e.preventDefault();
-      softFlash();
-
-      // 入力式を評価
-      const evaluated=evalExpression(input.value);
-      if(!isNaN(evaluated)){
-        input.value=Math.round(evaluated*1000)/1000;
-      }
-
-      // 数値が確定表示されてから再計算
-      setTimeout(()=>{
-        coerceNonZero(input);
-        handler();
-      },150); // 150msの遅延で視覚的に“確定→反映”
-    }
-  });
+function materializeResolution(){widthInput.value=1920;heightInput.value=Math.round(1920/state.ratio);}
+function renderFrame(){
+  const cW=500,cH=280,r=state.ratio;
+  let dw,dh;if(r>cW/cH){dw=cW;dh=cW/r;}else{dh=cH;dw=cH*r;}
+  frame.style.width=`${dw}px`;frame.style.height=`${dh}px`;
 }
-onEnterConfirm(ratioW,updateResolutionFromRatio);
-onEnterConfirm(ratioH,updateResolutionFromRatio);
+function renderAll(){updateRatioInputsFromState();materializeResolution();renderFrame();}
 
-/* 解像度側：Enterで比率更新（ロック考慮） */
-onEnterConfirm(widthInput,()=>{
-  const w=parseFloat(widthInput.value),h=parseFloat(heightInput.value);
-  if(!w||!h)return;
-  if(locked){
-    heightInput.value=Math.round(w/ratio);
-    resizeAll();
-    updateFrame();
-  }else{
-    resizeAll();
-    updateRatioFromResolution();
-  }
-});
-onEnterConfirm(heightInput,()=>{
-  const w=parseFloat(widthInput.value),h=parseFloat(heightInput.value);
-  if(!w||!h)return;
-  if(locked){
-    widthInput.value=Math.round(h*ratio);
-    resizeAll();
-    updateFrame();
-  }else{
-    resizeAll();
-    updateRatioFromResolution();
-  }
+/* 約分可能状態の検出 */
+function checkGlow(){
+  const rw=safeEval(ratioW.value);
+  const rh=safeEval(ratioH.value);
+  const g=gcd(rw,rh);
+  if(!state.decimalMode && g>1){frame.classList.add("glow");}
+  else{frame.classList.remove("glow");}
+}
+
+modeLabel.addEventListener("click",()=>{
+  state.decimalMode=!state.decimalMode;
+  modeLabel.textContent=state.decimalMode?"小数点モード":"整数モード";
+  modeLabel.classList.toggle("active",state.decimalMode);
+  updateRatioInputsFromState();renderFrame();
 });
 
-/* 🔗/⛓️‍💥切替 */
 lockBtn.addEventListener("click",()=>{
-  locked=!locked;
-  lockBtn.textContent=locked?"🔗":"⛓️‍💥";
-  lockBtn.classList.toggle("active",locked);
-  if(locked){
-    const w=parseFloat(widthInput.value);
-    const h=parseFloat(heightInput.value);
-    if(w&&h)ratio=w/h;
+  state.locked=!state.locked;
+  lockBtn.textContent=state.locked?"🔗":"⛓️‍💥";
+  lockBtn.classList.toggle("active",state.locked);
+});
+
+function zeroGuardImmediate(e){
+  if(!state.decimalMode){
+    const v=String(e.target.value).trim();
+    if(v==="0")e.target.value="1";
+  }
+}
+ratioW.addEventListener("input",zeroGuardImmediate);
+ratioH.addEventListener("input",zeroGuardImmediate);
+
+function commitRatioFromInputs(){
+  let rw=safeEval(ratioW.value),rh=safeEval(ratioH.value);
+  if(rw<=0)rw=1;if(rh<=0)rh=1;
+  state.ratio=rw/rh;materializeResolution();renderFrame();flashBG();checkGlow();
+}
+
+ratioW.addEventListener("keydown",e=>{if(e.key==="Enter")commitRatioFromInputs();});
+ratioH.addEventListener("keydown",e=>{if(e.key==="Enter")commitRatioFromInputs();});
+ratioW.addEventListener("change",commitRatioFromInputs);
+ratioH.addEventListener("change",commitRatioFromInputs);
+
+function commitResolutionFromInputs(activeEl){
+  let w=safeEval(widthInput.value),h=safeEval(heightInput.value);
+  if(w<=0)w=1;if(h<=0)h=1;
+  if(state.locked){
+    if(activeEl===widthInput){widthInput.value=w;heightInput.value=Math.round(w/state.ratio);}
+    else{heightInput.value=h;widthInput.value=Math.round(h*state.ratio);}
+  }else{
+    widthInput.value=w;heightInput.value=h;
+    state.ratio=w/h;updateRatioInputsFromState();
+  }
+  renderFrame();flashBG();showAlias();checkGlow();
+}
+widthInput.addEventListener("change",()=>commitResolutionFromInputs(widthInput));
+heightInput.addEventListener("change",()=>commitResolutionFromInputs(heightInput));
+
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Enter")return;
+  if(document.activeElement===widthInput)commitResolutionFromInputs(widthInput);
+  else if(document.activeElement===heightInput)commitResolutionFromInputs(heightInput);
+});
+
+/* 約分クリック */
+frame.addEventListener("click",()=>{
+  if(state.decimalMode)return;
+  let rw=safeEval(ratioW.value),rh=safeEval(ratioH.value);
+  if(rw<=0)rw=1;if(rh<=0)rh=1;
+  const g=gcd(rw,rh);
+  if(g>1){
+    ratioW.value=Math.round(rw/g);
+    ratioH.value=Math.round(rh/g);
+    renderFrame();
+    flashBG();
+    checkGlow();
   }
 });
 
-/* 初期化 */
-updateResolutionFromRatio();
-resizeAll();
-updateFrame();
+renderAll();
 </script>
 </body>
 </html>
-
