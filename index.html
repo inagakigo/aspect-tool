@@ -415,8 +415,8 @@
   </div>
 
   <div class="top-left-text">
-    <div class="top-left-text-ja">画像をドロップするとアスペクト比が表示されます</div>
-    <div class="top-left-text-en">Drop an image to display resolution and aspect ratio</div>
+    <div class="top-left-text-ja">アスペクト比や解像度の数値を入力してください<br>画像をドロップするとアスペクト比と解像度が表示されます</div>
+    <div class="top-left-text-en">Enter aspect ratio and resolution values.<br>Drop an image to display its aspect ratio and resolution.</div>
   </div>
   <div class="corner-title">ASPECT PROTOCOL</div>
 
@@ -897,7 +897,7 @@ Object.assign(resolutionInfo, {
 aliasLabel.addEventListener("click", (e)=>{
   e.stopPropagation();
   const alias = aliasLabel.textContent;
-  const info = resolutionInfo[alias.split(" ")[0]];
+  const info = resolutionInfo[alias];
   
   if(info) {
     document.getElementById("resolutionTitle").textContent = info.title;
