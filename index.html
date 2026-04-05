@@ -687,6 +687,19 @@ function showSuggestions(w, h) {
   }
 }
 
+// ウィンドウリサイズ時に位置を再計算
+function updateSuggestPosition() {
+  const suggestRow = document.getElementById("suggestRow");
+  if (suggestRow.style.display !== "none") {
+    const resRow = document.getElementById("resRow");
+    const rect = resRow.getBoundingClientRect();
+    suggestRow.style.top = (rect.bottom + 8) + "px";
+  }
+}
+
+window.addEventListener("resize", updateSuggestPosition);
+
+
 widthInput.addEventListener("keydown",e=>{if(e.key==="Enter")commitResolutionFromInputs(widthInput);});
 heightInput.addEventListener("keydown",e=>{if(e.key==="Enter")commitResolutionFromInputs(heightInput);});
 widthInput.addEventListener("change",()=>commitResolutionFromInputs(widthInput));
