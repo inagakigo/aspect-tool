@@ -1,4 +1,4 @@
-# ASPECT PROCOL
+# ASPECT PROTCOL
 
 ## 🧭 Overview
 A simple browser-based utility designed for **filmmakers, designers, and video editors** to intuitively calculate and visualize aspect ratios and resolutions.  
