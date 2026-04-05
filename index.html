@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>ASPECT PROTOCOL</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Ancizar+Sans&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700&display=swap" rel="stylesheet">
 <style>
   .page-frame {
     position: fixed; inset: 0;
@@ -16,7 +17,7 @@
   }
 
   body {
-    font-family: "IBM Plex Sans", "Noto Sans JP", sans-serif;
+    font-family: "Ancizar Sans", sans-serif;
     background: #000080;
     color: #FFFFFF;
     margin: 0;
@@ -38,7 +39,7 @@
     width: min(92vw, 560px);
     display: flex;
     flex-direction: column;
-    gap: clamp(24px, 6vw, 60px);
+    gap: clamp(20px, 5vw, 48px);
   }
 
   .preview {
@@ -48,17 +49,19 @@
     align-items: center;
     justify-content: center;
     position: relative;
+    overflow: visible;
   }
 
   .frame {
     background: #004687;
+    background-size: cover;
+    background-position: center;
     color: #FFFFFF;
     font-weight: 700;
-    font-size: clamp(20px, 5vw, 36px);
+    font-size: clamp(16px, 4vw, 24px);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
     padding: clamp(6px, 2vw, 12px) clamp(8px, 3vw, 14px);
     transform-origin: center;
     border: none;
@@ -68,6 +71,8 @@
     box-shadow: 0 0 6px rgba(255,255,255,0.12);
     animation: subtlePulse 8s ease-in-out infinite;
     position: relative;
+    cursor: pointer;
+    user-select: none;
   }
 
   @keyframes subtlePulse {
@@ -75,67 +80,107 @@
     50% { box-shadow: 0 0 14px rgba(255,255,255,0.25); }
   }
 
-  .frame.glow::before {
-    content: "";
-    position: absolute;
-    left: 0; top: 0;
-    width: 8px; height: 100%;
-    background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(0,255,255,0.6));
-    box-shadow: 0 0 18px rgba(0,255,255,0.7);
-    opacity: .7;
-    transition: opacity .3s, box-shadow .3s;
+  .frame.glow {
+    background: #002f6c;
+    cursor: pointer;
   }
-  .frame.glow:hover::before {
+
+  /* フレームの上に重ねる比率入力オーバーレイ（常に固定サイズ） */
+  .ratio-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    gap: 0px;
+    pointer-events: none;
+    z-index: 10;
+    white-space: nowrap;
+  }
+  .ratio-overlay input,
+  .ratio-overlay .symbol { pointer-events: all; }
+
+  .drop-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: clamp(12px, 3vw, 16px);
+    font-weight: 900;
+    color: #000080;
+    background: #FFAA00;
+    opacity: 0;
+    pointer-events: none;
+    letter-spacing: 0.05em;
+    transition: none;
+  }
+  .drop-overlay.active {
     opacity: 1;
-    box-shadow: 0 0 28px rgba(0,255,255,1);
+    pointer-events: auto;
+  }
+  .drop-text-en {
+    font-size: clamp(11px, 2.5vw, 14px);
+    font-weight: 600;
+    opacity: 0.8;
   }
 
   .alias-label {
     position: absolute;
     top: 6px; left: 10px;
     font-size: clamp(12px, 3vw, 15px);
-    color: #fff;
-    opacity: 0;
+    color: #FFFFFF;
+    opacity: 1;
     transition: opacity .6s;
-    pointer-events: none;
+    pointer-events: auto;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: transparent;
+    letter-spacing: 1px;
+  }
+  .alias-label:hover {
+    background: rgba(100, 150, 255, 0.3);
   }
   .alias-label.show { opacity: 1; }
 
-  .mode-label {
-    position: absolute;
-    right: 8px;
-    bottom: 6px;
-    font-size: clamp(9px, 2vw, 10px);
-    border: 1px solid rgba(255,255,255,0.4);
-    border-radius: 4px;
-    padding: 2px 5px;
-    color: #fff;
-    background: rgba(0,0,0,0.2);
-    cursor: pointer;
-    user-select: none;
-  }
+
 
   .inline-input {
-    width: clamp(62px, 18vw, 110px);
+    field-sizing: content;
+    min-width: 1.5ch;
     text-align: center;
-    font-size: clamp(18px, 4.2vw, 26px);
-    font-weight: 600;
+    font-size: clamp(20px, 4.8vw, 30px);
+    font-weight: 900;
     background: transparent;
     border: none;
-    border-bottom: 3px solid rgba(255,255,255,0.8);
+    border-radius: 999px;
     outline: none;
-    padding-bottom: 3px;
+    padding: 4px 8px;
     line-height: 1;
     appearance: textfield;
     color: #FFFFFF;
+    letter-spacing: 0.12em;
+    transition: none;
+  }
+  body.input-active .inline-input:not(:focus):hover {
+    box-shadow: none;
+    color: #fff;
+  }
+  .inline-input:hover, .inline-input:focus {
+    box-shadow: inset 0 0 0 999px #FFAA00;
+    color: #000080;
   }
 
   input[type=number]::-webkit-inner-spin-button,
   input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
   input[type=number] { -moz-appearance: textfield; }
 
-  .symbol { font-size: clamp(18px, 4.4vw, 28px); margin: 0 8px; color:#fff; }
-  .unit { font-size: clamp(13px, 3.2vw, 18px); margin-left: 4px; color:#fff; }
+  .symbol { font-size: clamp(16px, 3.2vw, 22px); margin: 0 2px; color:#fff; }
+  .unit { font-size: clamp(13px, 3.2vw, 18px); color:#fff; width: clamp(34px, 10vw, 44px); text-align: left; }
 
   .tool-btn {
     width: clamp(34px, 10vw, 44px);
@@ -144,21 +189,27 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    border: 1px solid rgba(255,255,255,0.5);
-    border-radius: 8px;
-    background: rgba(255,255,255,0.12);
+    border: none;
+    border-radius: 999px;
+    background: transparent;
     color: #fff;
     font-size: clamp(16px, 5vw, 22px);
-    margin-right: 10px;
+    transition: none;
+  }
+  .tool-btn:hover {
+    background: rgba(255,255,255,0.2);
+    color: #fff;
   }
 
-  .row {
-    display: flex;
+  .sym-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
     gap: 8px;
+    width: 100%;
   }
+  .sym-grid .left  { justify-self: end; }
+  .sym-grid .right { justify-self: start; }
 
   .corner-title {
     position: fixed;
@@ -166,56 +217,237 @@
     bottom: 0;
     margin: 0;
     padding: 4px 10px 3px 10px;
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: clamp(9px, 1.5vw, 11px);
-    font-weight: 600;
+    font-family: 'Ancizar Sans', sans-serif;
+    font-size: clamp(16px, 2.5vw, 20px);
+    font-weight: 700;
     color: #000060;
     background: #FFD700;
-    border-radius: 4px 0 0 0;
     box-shadow: 0 0 8px rgba(255,215,0,0.4);
-    letter-spacing: 1.2px;
+    letter-spacing: 0.5px;
     text-align: right;
     user-select: none;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+
+  .version-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: none;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  .version-modal.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .version-window {
+    background: #FFFFFF;
+    color: #000080;
+    padding: 24px 32px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    font-family: 'Ancizar Sans', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .version-item {
+    line-height: 2;
+  }
+
+  .version-description {
+    margin-top: 20px;
+    font-size: 14px;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    line-height: 1.8;
+    color: #000080;
+  }
+
+  .version-description-en {
+    margin-top: 12px;
+    font-size: 12px;
+    font-family: 'Ancizar Sans', sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+    color: #000080;
+    opacity: 0.8;
+  }
+
+  .resolution-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: none;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  .resolution-modal.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .resolution-window {
+    background: #FFFFFF;
+    color: #000080;
+    padding: 32px 40px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    text-align: left;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  .resolution-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: #000080;
+  }
+
+  .resolution-content {
+    font-size: 14px;
+    line-height: 1.8;
+    color: #000080;
+  }
+
+  .corner-title.top-left {
+    right: auto;
+    bottom: auto;
+    left: 0;
+    top: 0;
+    border-radius: 0 4px 0 0;
+    text-align: left;
+    line-height: 1.4;
+  }
+
+  .top-left-text {
+    position: fixed;
+    left: 0;
+    top: 0;
+    margin: 0;
+    padding: 8px 12px;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: clamp(12px, 2vw, 15px);
+    font-weight: 600;
+    color: #FFFFFF;
+    user-select: none;
+    pointer-events: none;
+    line-height: 1.3;
+  }
+
+  .top-left-text-ja {
+    white-space: nowrap;
+  }
+
+  .top-left-text-en {
+    font-family: 'Ancizar Sans', sans-serif;
+    font-size: clamp(11px, 1.8vw, 14px);
+    font-weight: 400;
+    opacity: 1;
+    white-space: nowrap;
+  }
+
+  /* 簡略化ヒント */
+  .simplify-hint {
+    position: absolute;
+    bottom: -26px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s;
     pointer-events: none;
   }
+  .frame.glow:hover ~ .simplify-hint,
+  .frame.glow:focus ~ .simplify-hint { opacity: 1; }
 </style>
 </head>
 <body>
   <div class="page-frame" aria-hidden="true"></div>
 
   <div class="container">
+
+    <!-- プレビューフレーム＋比率入力オーバーレイ -->
     <div class="preview" id="preview">
       <div class="frame" id="frame">
+        <div class="alias-label" id="aliasLabel"></div>
+        <div class="drop-overlay" id="dropOverlay">
+          <div class="drop-text">ここに画像をドロップ</div>
+          <div class="drop-text-en">Drop image here</div>
+        </div>
+      </div>
+      <!-- 比率入力欄：フレームの上に常に固定サイズで表示 -->
+      <div class="ratio-overlay">
         <input type="number" id="ratioW" class="inline-input" value="16" step="any">
         <span class="symbol">：</span>
         <input type="number" id="ratioH" class="inline-input" value="9" step="any">
-        <div class="alias-label" id="aliasLabel"></div>
-        <div class="mode-label" id="modeLabel">整数モード</div>
       </div>
-    </div>
-
-    <div class="row">
-      <button class="tool-btn" id="lockBtn">🔗</button>
-      <input type="number" id="width" class="inline-input" value="1920">
-      <span class="symbol">×</span>
-      <input type="number" id="height" class="inline-input" value="1080">
-      <span class="unit">px</span>
+      <span class="simplify-hint" id="simplifyHint">クリックで簡略化</span>
+      <!-- 解像度入力行：フレームの真下に追従 -->
+      <div id="resRow" style="position:absolute; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:8px; white-space:nowrap;">
+        <button class="tool-btn" id="lockBtn">🔗</button>
+        <input type="number" id="width" class="inline-input" value="1920" style="justify-self:end;">
+        <span class="symbol">×</span>
+        <input type="number" id="height" class="inline-input" value="1080" style="justify-self:start;">
+        <span class="unit" style="width:clamp(34px,10vw,44px);">px</span>
+      </div>
     </div>
   </div>
 
+  <div class="top-left-text">
+    <div class="top-left-text-ja">画像をドロップするとアスペクト比が表示されます</div>
+    <div class="top-left-text-en">Drop an image to display resolution and aspect ratio</div>
+  </div>
   <div class="corner-title">ASPECT PROTOCOL</div>
 
+  <!-- バージョン情報ウィンドウ -->
+  <div class="version-modal" id="versionModal">
+    <div class="version-window">
+      <div class="version-item">v1.3 @inagakigo  /  Updated 2026-04-05</div>
+      <div class="version-description">映像制作や、写真、グラフィックなどに関わる人たちが少しでも苦労を減らすために作りました。<br>自由に使ってください。また、スマートフォンは非対応です。</div>
+      <div class="version-description-en">Created to reduce the burden of those involved in video production, photography, and graphic design.<br>Feel free to use it. Also, smartphones are not supported.</div>
+    </div>
+  </div>
+
+  <!-- 解像度情報モーダル -->
+  <div class="resolution-modal" id="resolutionModal">
+    <div class="resolution-window">
+      <div class="resolution-title" id="resolutionTitle"></div>
+      <div class="resolution-content" id="resolutionContent"></div>
+    </div>
+  </div>
+
 <script>
-const state={ratio:16/9, decimalMode:false, locked:true};
+const state={ratio:16/9, decimalMode:false, locked:true, savedRatioW:null, savedRatioH:null};
 const preview=document.getElementById("preview");
 const frame=document.getElementById("frame");
 const ratioW=document.getElementById("ratioW");
 const ratioH=document.getElementById("ratioH");
 const widthInput=document.getElementById("width");
 const heightInput=document.getElementById("height");
-const modeLabel=document.getElementById("modeLabel");
 const lockBtn=document.getElementById("lockBtn");
 const aliasLabel=document.getElementById("aliasLabel");
+const simplifyHint=document.getElementById("simplifyHint");
 
 function flashBG(){
   document.body.classList.remove("flash");
@@ -224,37 +456,92 @@ function flashBG(){
 }
 
 function gcd(a,b){a=Math.abs(Math.round(a));b=Math.abs(Math.round(b));return b?gcd(b,a%b):(a||1);}
+function bestRatio(decimal, maxD=200){
+  let bN=1,bD=1,bErr=Math.abs(decimal-1);
+  for(let d=1;d<=maxD;d++){
+    const n=Math.round(decimal*d);
+    if(n<1) continue;
+    const err=Math.abs(decimal-n/d);
+    if(err<bErr){bErr=err;bN=n;bD=d;}
+    if(err<1e-6) break;
+  }
+  const g=gcd(bN,bD);
+  return [bN/g,bD/g];
+}
 function safeEval(v){try{const val=Function('"use strict";return('+v+')')();return isFinite(val)?Number(val):0;}catch{return 0;}}
 function formatDecimalSmart(r){return(Math.abs(r-Math.round(r))<1e-3)?String(Math.round(r)):r.toFixed(2);}
 
-// 🧩 0入力ガード
-function zeroGuardImmediate(e){
-  if(!state.decimalMode){
-    const v=String(e.target.value).trim();
-    if(v==="0") e.target.value="1";
-  }
+function limitDigits(input, max=5){
+  const v = String(input.value).replace('-','');
+  if(v.length > max) input.value = parseInt(v.slice(0, max));
 }
-ratioW.addEventListener("input", zeroGuardImmediate);
-ratioH.addEventListener("input", zeroGuardImmediate);
-widthInput.addEventListener("input", zeroGuardImmediate);
-heightInput.addEventListener("input", zeroGuardImmediate);
+
+function clampMin(input){
+  const v = parseFloat(input.value);
+  let min = 1;
+  if(input === widthInput)  min = Math.max(1, safeEval(ratioW.value));
+  if(input === heightInput) min = Math.max(1, safeEval(ratioH.value));
+  if(!input.value || isNaN(v) || v < min) input.value = min;
+}
+[ratioW, ratioH, widthInput, heightInput].forEach(el=>{
+  el.addEventListener("input", ()=>{ limitDigits(el); autosizeInput(el); });
+  el.addEventListener("focus", ()=>document.body.classList.add("input-active"));
+  el.addEventListener("blur",  ()=>document.body.classList.remove("input-active"));
+});
 
 const aliasMap={
   "1024x768":"XGA","1280x800":"WXGA","1600x900":"HD+","1920x1080":"FHD","1920x1200":"WUXGA",
   "2560x1440":"WQHD","2560x1600":"WQXGA","3440x1440":"UWQHD","3840x2160":"UHD 4K","4096x2160":"DCI 4K",
-  "5120x2880":"5K","6016x3384":"6K","7680x4320":"UHD 8K","8192x4320":"DCI 8K","1280x720":"HD 720","1366x768":"WXGA"
+  "5120x2880":"5K","6016x3384":"6K","7680x4320":"UHD 8K","8192x4320":"DCI 8K","1280x720":"HD 720","1366x768":"WXGA",
+  // 1.33:1 (4:3)
+  "1920x1440":"4:3 SD","2560x1920":"4:3 2.5K","2880x2160":"4:3 2.5K+",
+  // 1.5:1 (3:2)
+  "1920x1280":"3:2 HD","2880x1920":"3:2 DCI","3840x2560":"3:2 4K",
+  // 1.66:1 (European)
+  "1920x1154":"1.66:1 HD","3840x2308":"1.66:1 4K",
+  // 1.85:1 (American Cinema)
+  "1920x1038":"VISTA HD","3840x2076":"VISTA 4K","4096x2214":"VISTA DCI",
+  // 2.35:1 (Anamorphic)
+  "1920x816":"CINEMA SCOPE 2K","3840x1634":"CINEMA SCOPE 4K","4096x1716":"CINEMA SCOPE DCI",
+  // VISTA (1.85:1 alternate)
+  "1998x1080":"VISTA 2K","3996x2160":"VISTA 4K ALT"
 };
 let aliasTimer=null;
 function showAlias(){
   const key=`${widthInput.value}x${heightInput.value}`;
   const alias=aliasMap[key];
-  if(!alias)return;
+  if(!alias){
+    aliasLabel.textContent="";
+    aliasLabel.classList.remove("show");
+    return;
+  }
   aliasLabel.textContent=alias;
   aliasLabel.classList.add("show");
-  clearTimeout(aliasTimer);
-  aliasTimer=setTimeout(()=>aliasLabel.classList.remove("show"),5000);
 }
 
+const _canvas = document.createElement('canvas');
+const _ctx = _canvas.getContext('2d');
+function autosizeInput(input){
+  const style = getComputedStyle(input);
+  _ctx.font = style.fontWeight + ' ' + style.fontSize + ' ' + style.fontFamily;
+  const ls = parseFloat(style.letterSpacing) || 0;
+  const text = input.value || '1';
+  const tw = _ctx.measureText(text).width + ls * text.length;
+  input.style.width = (tw + 32) + 'px';
+}
+function autosizeAll(){
+  // 比率入力は両方を同じ幅に揃えて：を中央固定
+  autosizeInput(ratioW);
+  autosizeInput(ratioH);
+  const maxRatio = Math.max(parseFloat(ratioW.style.width)||0, parseFloat(ratioH.style.width)||0);
+  ratioW.style.width = maxRatio + 'px';
+  ratioH.style.width = maxRatio + 'px';
+  // 解像度入力は独立
+  autosizeInput(widthInput);
+  autosizeInput(heightInput);
+}
+
+const resRow=document.getElementById("resRow");
 function renderFrame(){
   const box=preview.getBoundingClientRect();
   const cW=Math.max(60,box.width-40);
@@ -264,77 +551,368 @@ function renderFrame(){
   if(r>cW/cH){dw=cW;dh=cW/r;}else{dh=cH;dw=cH*r;}
   frame.style.width=`${dw}px`;
   frame.style.height=`${dh}px`;
+  // 解像度行をフレームの真下に配置
+  resRow.style.top = (box.height/2 + dh/2 + 12) + 'px';
 }
 
 function checkGlow(){
   const rw=safeEval(ratioW.value),rh=safeEval(ratioH.value),g=gcd(rw,rh);
-  if(!state.decimalMode&&g>1){frame.classList.add("glow");}
-  else{frame.classList.remove("glow");}
+  if(!state.decimalMode&&g>1){
+    frame.classList.add("glow");
+    simplifyHint.style.opacity="";
+  }else{
+    frame.classList.remove("glow");
+    simplifyHint.style.opacity="0";
+  }
 }
 
 function updateRatioInputs(){
   if(state.decimalMode){
+    // 整数モードの値を退避してから小数点モードへ
+    state.savedRatioW=ratioW.value; state.savedRatioH=ratioH.value;
     const val=formatDecimalSmart(state.ratio);
     ratioW.value=val; ratioH.value=1;
   }else{
-    const w=Math.round(state.ratio*100),h=100;
-    const g=gcd(w,h);
-    ratioW.value=w/g; ratioH.value=h/g;
+    // 整数モードに戻るとき：退避した値を復元
+    if(state.savedRatioW!=null&&state.savedRatioH!=null){
+      ratioW.value=state.savedRatioW;
+      ratioH.value=state.savedRatioH;
+      state.savedRatioW=null; state.savedRatioH=null;
+    }else{
+      const [rw,rh]=bestRatio(state.ratio);
+      ratioW.value=rw; ratioH.value=rh;
+    }
   }
-  checkGlow(); renderFrame();
+  checkGlow(); renderFrame(); autosizeAll();
 }
 
 function commitRatioFromInputs(){
+  clampMin(ratioW); clampMin(ratioH);
   let rw=safeEval(ratioW.value),rh=safeEval(ratioH.value);
   if(rw<=0)rw=1;if(rh<=0)rh=1;
   state.ratio=rw/rh;
   widthInput.value=1920;
-  heightInput.value=Math.round(1920/state.ratio);
-  renderFrame();flashBG();checkGlow();
+  heightInput.value=(1920/state.ratio).toFixed(2);
+  renderFrame();flashBG();checkGlow();autosizeAll();
 }
 ratioW.addEventListener("keydown",e=>{if(e.key==="Enter")commitRatioFromInputs();});
 ratioH.addEventListener("keydown",e=>{if(e.key==="Enter")commitRatioFromInputs();});
+ratioW.addEventListener("change",()=>commitRatioFromInputs());
+ratioH.addEventListener("change",()=>commitRatioFromInputs());
 
 function commitResolutionFromInputs(activeEl){
+  clampMin(widthInput); clampMin(heightInput);
   let w=safeEval(widthInput.value),h=safeEval(heightInput.value);
   if(w<=0)w=1;if(h<=0)h=1;
-  if(state.locked){
-    if(activeEl===widthInput){heightInput.value=Math.round(w/state.ratio);}
-    else{widthInput.value=Math.round(h*state.ratio);}
+  
+  // 特殊アスペクト比マップ
+  const specialAspectMap = {
+    "1920x1440": 1.33, "2560x1920": 1.33, "2880x2160": 1.33,
+    "1920x1280": 1.5, "2880x1920": 1.5, "3840x2560": 1.5,
+    "1920x1154": 1.66, "3840x2308": 1.66,
+    "1920x1038": 1.85, "3840x2076": 1.85, "4096x2214": 1.85, "1998x1080": 1.85, "3996x2160": 1.85,
+    "1920x816": 2.35, "3840x1634": 2.35, "4096x1716": 2.35
+  };
+  
+  const key = `${w}x${h}`;
+  if(specialAspectMap[key]) {
+    state.ratio = specialAspectMap[key];
+    state.locked = true;
+    lockBtn.textContent = "🔗";
+    ratioW.value = state.ratio.toString();
+    ratioH.value = "1";
+  } else if(state.locked){
+    if(activeEl===widthInput){
+      const newH = parseFloat((w/state.ratio).toFixed(2));
+      const newW = parseFloat((newH*state.ratio).toFixed(2));
+      widthInput.value = newW;
+      heightInput.value = newH;
+    }else{
+      const newW = parseFloat((h*state.ratio).toFixed(2));
+      const newH = parseFloat((newW/state.ratio).toFixed(2));
+      widthInput.value = newW;
+      heightInput.value = newH;
+    }
   }else{
     state.ratio=w/h; updateRatioInputs();
   }
-  renderFrame();flashBG();showAlias();checkGlow();
+  renderFrame();flashBG();showAlias();checkGlow();autosizeAll();
 }
 
-// 🔹 左右どちらの入力もEnterで確定可能に
 widthInput.addEventListener("keydown",e=>{if(e.key==="Enter")commitResolutionFromInputs(widthInput);});
 heightInput.addEventListener("keydown",e=>{if(e.key==="Enter")commitResolutionFromInputs(heightInput);});
 widthInput.addEventListener("change",()=>commitResolutionFromInputs(widthInput));
 heightInput.addEventListener("change",()=>commitResolutionFromInputs(heightInput));
 
 frame.addEventListener("click",(e)=>{
-  if(e.target.closest(".inline-input")||e.target.closest(".mode-label")) return;
   if(state.decimalMode)return;
   let rw=safeEval(ratioW.value),rh=safeEval(ratioH.value);
   const g=gcd(rw,rh);
   if(g>1){ratioW.value=rw/g;ratioH.value=rh/g;flashBG();checkGlow();}
 });
 
-modeLabel.addEventListener("click",()=>{
-  state.decimalMode=!state.decimalMode;
-  modeLabel.textContent=state.decimalMode?"小数点モード":"整数モード";
-  updateRatioInputs();
-});
+
+
 
 lockBtn.addEventListener("click",()=>{
   state.locked=!state.locked;
   lockBtn.textContent=state.locked?"🔗":"⛓️‍💥";
 });
 
+// ── ドラッグ&ドロップ ──
+const dropOverlay=document.getElementById("dropOverlay");
+
+// より安全なドラッグ&ドロップ管理
+document.addEventListener("dragenter",e=>{
+  e.preventDefault();
+  dropOverlay.classList.add("active");
+  document.querySelector(".ratio-overlay").style.opacity="0";
+  document.querySelector(".ratio-overlay").style.pointerEvents="none";
+});
+
+document.addEventListener("dragover",e=>e.preventDefault());
+
+document.addEventListener("dragleave",e=>{
+  // documentを離れた時だけ非表示
+  if(e.clientX===0 && e.clientY===0) {
+    dropOverlay.classList.remove("active");
+    document.querySelector(".ratio-overlay").style.opacity="1";
+    document.querySelector(".ratio-overlay").style.pointerEvents="auto";
+  }
+});
+
+document.addEventListener("drop",e=>{
+  e.preventDefault();
+  e.stopPropagation();
+  dropOverlay.classList.remove("active");
+  document.querySelector(".ratio-overlay").style.opacity="1";
+  document.querySelector(".ratio-overlay").style.pointerEvents="auto";
+  const file=[...e.dataTransfer.files].find(f=>f.type.startsWith("image/"));
+  if(!file) return;
+  const url=URL.createObjectURL(file);
+  const img=new Image();
+  img.onload=()=>{
+    const w=img.naturalWidth, h=img.naturalHeight;
+    // 背景画像を設定
+    frame.style.backgroundImage = `url('${url}')`;
+    frame.style.backgroundColor = 'rgba(0,0,0,0.5)';
+    frame.style.backgroundBlendMode = 'multiply';
+    // 画像の自然なサイズを設定
+    widthInput.value=w;
+    heightInput.value=h;
+    // 一度ロック解除して、正確なサイズを反映させる
+    state.locked=false;
+    // アスペクト比を検出・設定
+    commitResolutionFromInputs(widthInput);
+    renderFrame(); flashBG(); showAlias(); checkGlow(); autosizeAll();
+  };
+  img.src=url;
+});
+
 const ro=new ResizeObserver(()=>renderFrame());
 ro.observe(preview);
+
 renderFrame();
+checkGlow();
+autosizeAll(); document.fonts.ready.then(()=>autosizeAll());
+showAlias();
+
+// バージョン情報モーダル
+const cornerTitle = document.querySelector(".corner-title");
+const versionModal = document.getElementById("versionModal");
+const versionWindow = document.querySelector(".version-window");
+
+cornerTitle.addEventListener("mouseenter", ()=>{
+  versionModal.classList.add("active");
+});
+
+cornerTitle.addEventListener("mouseleave", ()=>{
+  // ウィンドウの上にマウスがあればアクティブを保つ
+  if(!versionWindow.matches(":hover")) {
+    versionModal.classList.remove("active");
+  }
+});
+
+versionWindow.addEventListener("mouseenter", ()=>{
+  versionModal.classList.add("active");
+});
+
+versionWindow.addEventListener("mouseleave", ()=>{
+  versionModal.classList.remove("active");
+});
+
+// 解像度情報の豆知識
+const resolutionInfo = {
+  "CGA": {
+    title: "CGA (320×200)",
+    content: "Color Graphics Adapterは1980年代のIBM PCの象徴的な解像度です。4色しか表示できない制限がありながら、初期のコンピューターゲーム『Pac-Man』『Donkey Kong』などの文化を生み出しました。デジタル映像表現の歴史における重要なマイルストーンです。"
+  },
+  "EGA": {
+    title: "EGA (640×480)",
+    content: "Enhanced Graphics Adapterは1984年に登場し、16色表示を実現した革新的な規格です。IBM PC互換機の標準となり、DOS時代のビジネスソフトやゲームの発展を支えました。現代のスクエアなアスペクト比の源流です。"
+  },
+  "SVGA": {
+    title: "SVGA (800×600)",
+    content: "Super VGAは1989年にVESA規格として標準化されました。Windows 3.0以降の標準解像度として採用され、1990年代のパーソナルコンピューター普及期を象徴する規格です。16ビットカラー表示との組み合わせで、初めて実用的な色数を実現しました。"
+  },
+  "UXGA": {
+    title: "UXGA (1600×1200)",
+    content: "Ultra XGAは1990年代後期のハイエンドディスプレイ規格です。大型モニターでの高精細表示を実現し、CAD設計やグラフィックデザイン、プリンタ技術の開発に貢献しました。プロフェッショナル向け機器の標準として機能してきました。"
+  },
+  "nHD": {
+    title: "nHD (640×360)",
+    content: "nanoHDはスマートフォン黎明期の標準解像度です。2010年前後のAndroidスマートフォンで採用され、小型高密度ディスプレイの初期段階を象徴しています。モバイルビデオ配信の標準規格としても機能していました。"
+  },
+  "qHD": {
+    title: "qHD (960×540)",
+    content: "quarter HDはAndroidのハイエンドスマートフォン初期の高解像度規格です。Galaxy SやXperia等のフラグシップモデルで採用され、スマートフォンの高画質化競争を引き起こすきっかけとなった重要な規格です。"
+  },
+  "2K": {
+    title: "2K (2048×1080)",
+    content: "2Kはデジタルシネマの業務規格として2005年に標準化されました。映画の撮影・編集・DCP（デジタルシネマパッケージ）作成における実務規格として機能し、映画業界全体で採用されています。DCI 4Kの前段階としても重要です。"
+  },
+  "QHD+": {
+    title: "QHD+ (1440×2560)",
+    content: "Quad HDプラスはスマートフォンの高解像度規格として2014年前後に採用され始めました。Samsung Galaxy Note等の大型スマートフォンで標準となり、携帯デバイスにおける高精細表示の新しい基準を確立しました。現在も多くのフラグシップモデルで採用されています。"
+  },
+  "12K": {
+    title: "12K (15360×8640)",
+    content: "12Kは8Kを超える実験的な超高解像度規格です。NHKなど大型放送局での研究開発段階にあり、未来の大型スクリーン表示やVR・立体映像の可能性を探索する際に検討されています。まだ実用段階には至っていません。"
+  },
+  "FHD+": {
+    title: "FHD+ (1080×1920)",
+    content: "FHD Plusはスマートフォンやタブレットの縦向き高解像度規格です。2016年頃からAndroidフラグシップスマートフォンで採用され始め、縦長ディスプレイの活用による没入感のある視聴体験を実現しました。モバイル映像コンテンツの制作標準となりつつあります。"
+  },
+  "XGA": {
+    title: "XGA (1024×768)",
+    content: "Extended Graphics Arrayは1990年代のCRTモニター時代を象徴する解像度です。Windows 95・98の推奨表示解像度として定着し、初期のノートPCでも広く使用されました。デスクトップコンピューティング黎明期の標準規格です。"
+  },
+  "WXGA": {
+    title: "WXGA (1280×800, 1366×768)",
+    content: "ワイドXGAは2000年代初頭にワイド液晶が普及した際の標準解像度です。ノートPCやネットブック全盛期の定番規格で、コストと性能のバランスが良く、今でも低価格PCで採用されています。"
+  },
+  "HD+": {
+    title: "HD+ (1600×900)",
+    content: "HD Plusは2010年代初頭のノートPCやモニターで採用された解像度です。FHDより一段階下のコストで、それなりの作業領域を提供するニッチな規格として機能してきました。"
+  },
+  "WUXGA": {
+    title: "WUXGA (1920×1200)",
+    content: "ワイドUXGAはビジネス用ディスプレイやプリンタなどで採用された専門的な解像度です。16:10のアスペクト比で、文書作成やスプレッドシート作業に最適化されており、業務用途での需要が続いています。"
+  },
+  "WQXGA": {
+    title: "WQXGA (2560×1600)",
+    content: "ワイドQXGAは30インチ前後の業務用ディスプレイで採用された高解像度です。映像編集やCAD、デジタルデザインの業務環境で、実用的な作業領域を提供する選択肢として使用されてきました。"
+  },
+  "UWQHD": {
+    title: "UWQHD (3440×1440)",
+    content: "ウルトラワイドQHDは超広角モニター（34インチ以上）の標準解像度です。マルチモニター環境の代替として、トレーディング、ビデオ編集、ゲーム配信など、複数の情報を同時表示する用途に最適化されています。"
+  },
+  "DCI 4K": {
+    title: "DCI 4K (4096×2160)",
+    content: "Digital Cinema Initiativesの規格で、映画業界の業務用4K標準です。撮影・編集・マスタリング・上映全てのパイプラインで採用され、UHD 4Kとは異なる映像制作の実務規格として機能しています。"
+  },
+  "5K": {
+    title: "5K (5120×2880)",
+    content: "5Kは27インチのApple iMacやプロフェッショナルディスプレイで採用された高解像度です。4Kと8Kの中間的なポジションで、映像制作やCGクリエイティブの現場で、処理負荷と画質のバランスを取る選択肢として機能しています。"
+  },
+  "6K": {
+    title: "6K (6016×3384)",
+    content: "6Kは高級シネマカメラ（RED、Blackmagic等）による撮影規格です。映画制作やハイエンドビデオ制作での原始データとして使用され、後段の編集・グレーディング・エクスポートで様々な形式に変換されるマスター規格として重要です。"
+  },
+  "DCI 8K": {
+    title: "DCI 8K (8192×4320)",
+    content: "8K版のDCI規格で、映画業界における次次世代の映像規格です。現在は研究・実験段階ですが、大型スクリーンでの上映やVR映画など、次世代映像体験の可能性を探索する際の対象規格となっています。"
+  }
+};
+
+// 既存の豆知識と統合
+Object.assign(resolutionInfo, {
+  "FHD": {
+    title: "FHD (1920×1080)",
+    content: "フルハイビジョンは2004年頃から採用され始め、2006年にBlu-rayの標準解像度として国際規格化されました。地上デジタル放送の標準でもあり、テレビ放送、Blu-ray、映画館のデジタルシネマの基準を支えてきた規格です。2010年代中盤までYouTubeやNetflixの標準品質として採用され、液晶テレビやデジタルプロジェクターの普及を支えました。4Kの普及により「旧世代」扱いされ始めかけたが、現在でも完パケはこの解像度が主流です。"
+  },
+  "HD 720": {
+    title: "HD 720 (1280×720)",
+    content: "HD 720pはYouTubeが初期段階で提供した標準解像度です。インターネット帯域幅が限られていた時代に、高品質と低容量のバランスを取る選択肢として活躍しました。スマートフォン普及期も長く使用された実用的な規格です。"
+  },
+  "UHD 4K": {
+    title: "UHD 4K (3840×2160)",
+    content: "Ultra HD 4Kは2012年に国際電気通信連合によって標準化されました。4Kテレビの普及や8K放送への足がかりとして重要な規格です。高精細映像のニーズが高まる中で、業務用から家庭用まで幅広く採用されています。"
+  },
+  "WQHD": {
+    title: "WQHD (2560×1440)",
+    content: "ワイドクアッドHDは27インチ前後のモニターで標準的な解像度です。ゲーミングやクリエイティブワークの現場で、FHDとUHD 4Kの中間的な選択肢として定着しています。"
+  },
+  "UHD 8K": {
+    title: "UHD 8K (7680×4320)",
+    content: "8Kは4Kの4倍の解像度で、2016年にNHKが本格的な放送試験を開始しました。現在も次世代映像規格として開発が続いており、スポーツ中継や映画制作現場での活用が期待されています。"
+  },
+  "CINEMA SCOPE 2K": {
+    title: "CINEMA SCOPE 2K (1920×816)",
+    content: "シネマスコープ 2Kは、HD時代における映画フォーマットの標準解像度です。2.35:1のワイドアスペクト比で、テレビ放送やストリーミング配信での映画コンテンツ配信に広く使用されています。FHD（1920×1080）より上下が狭くなり、映画館での映像体験をホームシアターで再現します。"
+  },
+  "CINEMA SCOPE 4K": {
+    title: "CINEMA SCOPE 4K UHD (3840×1634)",
+    content: "シネマスコープ 4K UHDは、UHD時代における映画フォーマットの標準解像度です。4K UHD（3840×2160）の横幅を保ちながら、2.35:1のシネマスコープアスペクト比に対応させた解像度です。4Kテレビやストリーミング配信サービスで映画を視聴する際の高品質フォーマットとして採用されています。"
+  },
+  "CINEMA SCOPE DCI": {
+    title: "CINEMA SCOPE DCI 4K (4096×1716)",
+    content: "シネマスコープ DCI 4Kは、映画業界の業務用標準格式です。DCI 4K（4096×2160）をシネマスコープの2.35:1アスペクト比に対応させた解像度で、映画の撮影・編集・DCP（デジタルシネマパッケージ）作成、そして映画館での上映まで、全てのパイプラインで採用される業務規格です。映画制作の最高品質を実現します。"
+  },
+  "4:3 SD": {
+    title: "4:3 Standard Definition (1920×1440)",
+    content: "4:3のスタンダード定義は、テレビジョン放送やビデオカメラの初期標準フォーマットです。1.33:1のアスペクト比で、古典的なテレビ放送や初期のデジタルビデオに広く採用されていました。現代では博物館展示やアーカイブ映像の管理に使用されることがあります。"
+  },
+  "3:2 HD": {
+    title: "3:2 Film Format (1920×1280)",
+    content: "3:2（1.5:1）は35mm映画フィルムのネイティブアスペクト比です。デジタル一眼レフカメラやミラーレスカメラの多くも、この比率でセンサーが設計されています。映画的な質感を持ちながらも、16:9よりも情報量が多くなります。"
+  },
+  "1.66:1 HD": {
+    title: "1.66:1 European Widescreen (1920×1154)",
+    content: "1.66:1はヨーロッパで採用されたワイドスクリーン規格です。シネマスコープほど極端ではなく、アメリカンビスタよりもやや横長です。ヨーロッパの映画館やテレビ放送で標準化されており、歴史的な映画制作でよく見られるフォーマットです。"
+  },
+  "VISTA HD": {
+    title: "VISTA American Cinema (1920×1038)",
+    content: "アメリカンビスタは1.85:1のアスペクト比を持つ映画フォーマットです。北米の映画館での標準規格として採用され、シネマスコープほど横長ではなく、テレビのアスペクト比より広い特性があります。映画制作における重要なフォーマットです。"
+  },
+  "VISTA 4K": {
+    title: "VISTA 4K (3840×2076)",
+    content: "アメリカンビスタ 4Kは、UHD時代における1.85:1映画フォーマットの標準解像度です。4K UHD（3840×2160）の横幅を保ちながら、アメリカンビスタのアスペクト比に対応させた解像度で、4Kテレビやストリーミング配信サービスでの映画配信に使用されます。"
+  },
+  "VISTA DCI": {
+    title: "VISTA DCI 4K (4096×2214)",
+    content: "アメリカンビスタ DCI 4Kは、映画業界の業務用1.85:1フォーマットです。DCI 4K（4096×2160）をアメリカンビスタのアスペクト比に対応させた解像度で、映画館でのワイドスクリーン上映に対応した業務規格として機能します。"
+  },
+  "VISTA 2K": {
+    title: "VISTA 2K (1998×1080)",
+    content: "アメリカンビスタ 2Kは、HD時代における1.85:1映画フォーマットの代表的な解像度です。映画配信やストリーミングサービスでのコンテンツ配信に広く使用されており、シネマティックな視聴体験を提供します。"
+  },
+  "VISTA 4K ALT": {
+    title: "VISTA 4K Alternate (3996×2160)",
+    content: "アメリカンビスタ 4K代替フォーマットは、4K制作での1.85:1アスペクト比対応です。3996×2160の解像度で、標準的な4Kフルサイズを維持しながらアメリカンビスタのワイドスクリーン体験を実現します。"
+  }
+});
+
+// alias-labelのクリックイベント
+aliasLabel.addEventListener("click", (e)=>{
+  e.stopPropagation();
+  const alias = aliasLabel.textContent;
+  const info = resolutionInfo[alias.split(" ")[0]];
+  
+  if(info) {
+    document.getElementById("resolutionTitle").textContent = info.title;
+    document.getElementById("resolutionContent").textContent = info.content;
+    document.getElementById("resolutionModal").classList.add("active");
+  }
+});
+
+// 解像度モーダルを閉じる
+const resolutionModal = document.getElementById("resolutionModal");
+resolutionModal.addEventListener("click", (e)=>{
+  if(e.target === resolutionModal) {
+    resolutionModal.classList.remove("active");
+  }
+});
 </script>
 </body>
 </html>
